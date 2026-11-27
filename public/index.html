@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#263129">
+  <title>Shortlink Lab</title>
+  <link rel="stylesheet" href="/lab.css">
+  <script type="module" src="/client.js"></script>
+</head>
+<body>
+  <header><div class="wrap brand"><span class="mark" aria-hidden="true">↗</span> Shortlink Lab</div></header>
+  <main class="wrap">
+    <h1>Make a short link.</h1>
+    <p class="intro">Give a web address a seven-character code. Open the short link, then check how many times it was visited.</p>
+    <form id="create">
+      <label for="destination">Destination URL</label>
+      <input id="destination" type="url" required maxlength="4096" placeholder="https://example.com/a/long/path">
+      <div class="controls">
+        <div>
+          <label for="expiry">Link expires after</label>
+          <select id="expiry">
+            <option value="">Never</option>
+            <option value="30">30 seconds</option>
+            <option value="3600">1 hour</option>
+            <option value="86400">1 day</option>
+          </select>
+        </div>
+        <button id="submit" type="submit">Create short link ↗</button>
+      </div>
+    </form>
+    <p id="message" role="status"></p>
+    <section id="result" hidden>
+      <h2>Your short link</h2>
+      <a id="short-url" target="_blank" rel="noopener noreferrer"></a>
+      <p>Open the link in a new tab, return here, and refresh the stats.</p>
+      <dl><div><dt>Recorded clicks</dt><dd id="clicks">0</dd></div><div><dt>Last visit</dt><dd id="last">No visits yet</dd></div><div><dt>Expiry</dt><dd id="expires">Never</dd></div></dl>
+      <button id="refresh" class="secondary" type="button">Refresh stats</button>
+    </section>
+    <details>
+      <summary>Where does my request go?</summary>
+      <ol>
+        <li><strong>Express</strong> checks your IP's token bucket and validates your URL.</li>
+        <li><strong>PostgreSQL</strong> saves the short code, destination, and expiry.</li>
+        <li><strong>Redis</strong> remembers the destination after its first lookup for up to five minutes.</li>
+        <li>For each accepted visit, PostgreSQL adds one click. Express sends a <code>302</code> response and your browser opens the destination.</li>
+      </ol>
+    </details>
+  </main>
+</body>
+</html>

@@ -1,0 +1,39 @@
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:3100:3100"
+    environment:
+      PORT: 3100
+      BIND_HOST: 0.0.0.0
+      BASE_URL: http://localhost:3100
+      DATABASE_URL: postgres://lab:lab@db:5432/shortlinks
+      REDIS_URL: redis://cache:6379
+      LIMITER_MODE: ${LIMITER_MODE:-bucket}
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: lab
+      POSTGRES_PASSWORD: lab
+      POSTGRES_DB: shortlinks
+    volumes:
+      - links:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "lab", "-d", "shortlinks"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  cache:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+volumes:
+  links:
