@@ -88,3 +88,9 @@ With the containers running, execute `docker compose exec app npm test`. The HTT
 **Using your own services.** With Node 22 or newer, PostgreSQL and Redis running, set `DATABASE_URL` and `REDIS_URL` in your shell, then run `npm ci` and `npm start`. The default address is `http://localhost:3100`. Set `BASE_URL` to the address the app should put in generated links, and `PORT` if you need another port. This local setup uses the direct connection's IP for rate limiting.
 
 For more background, read the [Express middleware guide](https://expressjs.com/en/guide/using-middleware/) and the [Redis cache-aside guide](https://redis.io/docs/latest/develop/use-cases/cache-aside/).
+
+## Deploy on Vercel
+
+Import the repository as an Express project. Connect a PostgreSQL database and a Redis database to the production environment. The app reads `DATABASE_URL` (or `POSTGRES_URL`) and a TCP connection string in `REDIS_URL` (or `KV_URL`). Use the pooled connection string for managed PostgreSQL and the TLS connection string for managed Redis. Keep these values in Vercel’s environment settings.
+
+The production build checks Redis and creates the PostgreSQL table before publishing. Vercel serves the form from `public/` and sends API requests and short-link visits to [index.js](index.js). Short links use the project's production domain automatically. Set `BASE_URL` if you want to use a particular custom domain.

@@ -1,17 +1,10 @@
 import { readFile } from 'node:fs/promises';
-import { Pool } from 'pg';
-import Redis from 'ioredis';
 import { createApp } from './app.js';
+import { createClients } from './services.js';
 
 const port = Number(process.env.PORT || 3100);
 const baseUrl = process.env.BASE_URL || 'http://localhost:' + port;
-const db = new Pool({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 3000 });
-const redis = new Redis(process.env.REDIS_URL || 'redis://127.0.0.1:6379', {
-  maxRetriesPerRequest: 1,
-  connectTimeout: 3000
-});
-redis.on('error', error => console.error('Redis:', error.message));
-db.on('error', error => console.error('PostgreSQL:', error.message));
+const { db, redis } = createClients(process.env.DATABASE_URL, process.env.REDIS_URL || 'redis://127.0.0.1:6379');
 
 try {
   await db.query(await readFile(new URL('./schema.sql', import.meta.url), 'utf8'));
